@@ -1,4 +1,10 @@
-# CraftGuild standards
+<h1 align="center">CraftGuild Standards</h1>
+
+<p align="center">
+  <a href="https://github.com/Essk/ai-contribution-level">
+    <img src="https://raw.githubusercontent.com/Essk/ai-contribution-level/main/badges/level-3.svg" alt="AI Contribution">
+  </a>
+</p>
 
 Shared CLI presentation, artifact SBOM preparation, quality checks and development
 contracts for CraftGuild products. Language-neutral rules are backed by Rust and
