@@ -5,6 +5,11 @@ including relevant untracked files. Results have stable IDs and text/JSON forms.
 Inventory all implementation languages and fail for unsupported configuration,
 missing tools, missing measurements, empty required checks or unexecuted gates.
 
+Ordinary test/check commands have no implicit elapsed-time deadline. Cancellation
+and subprocess cleanup remain required. Product-specific watchdogs retain their
+own explicit bounds; a slow aggregate must not be interrupted by a hidden
+one-hour default. Build/prepare accept an explicit `--timeout SECONDS` when needed.
+
 Use **tokei 15.0.0 Code**, per file, at most **400** implementation lines. Tests,
 test-only helpers, fixtures, ADRs and design documents are excluded by actual role
 with explicit evidence, not vague names. For mixed files, syntax-aware adapters

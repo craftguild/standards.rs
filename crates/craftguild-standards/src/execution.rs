@@ -104,13 +104,10 @@ pub fn execute(
             .get("cancel-file")
             .map(|s| crate::execution_context::absolute(root, &s))
             .transpose()?,
-        timeout: Duration::from_secs(
-            options
-                .get("timeout")
-                .map(|s| s.parse())
-                .transpose()?
-                .unwrap_or(3600),
-        ),
+        timeout: options
+            .get("timeout")
+            .map(|s| s.parse::<u64>().map(Duration::from_secs))
+            .transpose()?,
         ..Runner::default()
     };
     runner.env.extend(context.environment.clone());

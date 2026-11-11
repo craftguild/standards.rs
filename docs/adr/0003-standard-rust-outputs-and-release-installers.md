@@ -2,6 +2,10 @@
 
 Status: Accepted; standards bundle additions superseded by [ADR 0004](0004-repository-initialization-and-prime.md)
 
+The [authenticated transport amendment](#authenticated-transport-amendment-2026-11-11)
+extends the original curl-only download contract without changing packaging,
+checksum verification, destination placement or uninstall behavior.
+
 Extends [ADR 0002](0002-standards-owned-build-orchestration.md). This records the
 approved design; implementation evidence is recorded in the
 [verification guide](../guides/verification.md#adr-0003-source-qualification-2026-11-06).
@@ -76,10 +80,11 @@ while adopting that mode separately.
 
 The common interfaces are:
 
-    craftguild-standards installer [--artifact ID] [--check]
-    craftguild-standards package [--group ID] --output DIR
+    craftguild-standards-engine installer [--artifact ID] [--check]
+    craftguild-standards-engine package [--group ID] --output DIR
 
-Make and the pinned launcher forward the same operations and arguments.
+These names follow ADR 0006's v0.5.0 CLI split; earlier releases used the single
+full CLI. Make and the pinned launcher forward the same operations and arguments.
 `installer` deterministically generates all declarations unless one artifact is
 selected. `--check` compares without writing; ordinary `check` also verifies that
 declared scripts match the generator. The template is embedded in the engine,
@@ -109,8 +114,9 @@ Write the following into a fresh output directory through temporary staging:
 - The corresponding `<command>-v<version>-<target>.bom.json`.
 - `SHA256SUMS-<target>.txt`, covering the executable and SBOM files.
 
-The standards-specific delivery wrapper reuses these common outputs and adds its
-execution entry, skill bundle and release identity. It then computes final
+The standards-specific delivery wrapper reuses these common outputs and adds
+role-separated release metadata under ADR 0006. The former execution/skill bundles
+were retired by ADR 0004. It then computes final
 checksums covering all delivery files except checksum files themselves. Keep
 checksums out of intermediate asset maps that would create circular hashes.
 Existing destination directories are not overwritten or incrementally merged.
@@ -245,3 +251,39 @@ stage/commit/tag/push, release preparation and publication require a separate
 request and are not part of the implementation goal. Preserve published v0.1.0
 and v0.2.0 and retain the existing signing-stop contract for actual signed work.
 Track implementation and its evidence in `bd` goal issue `standards-bgd`.
+
+For v0.5.0 product adoption, use ADR 0006's
+[I1–I8 integration criteria](0006-initializer-cli-and-controlled-engine-upgrades.md#product-integration-and-local-completion).
+Standard output configuration or a passing installer generation check satisfies
+only part of that contract. Final product builds, applicable acceptance and
+current-source evidence remain required. Common layout, installer and packaging
+failure matrices stay in standards with neutral fixtures. Local integration does
+not require performing a real release or fabricating the clean HEAD and release
+receipts needed by delivery packaging; those operations require separate authority.
+
+## Authenticated transport amendment (2026-11-11)
+
+Private GitHub releases require authenticated retrieval of the installer and its
+assets. Add optional `transport = "github-cli"` to an installer declaration;
+`curl` remains the default and unknown transport values fail configuration.
+No secret belongs in `craftguild.toml` or script arguments. This is a compatible
+configuration-schema-2 extension with no receipt or artifact-format change.
+
+The generated script reuses an existing GitHub CLI login or environment
+`GH_TOKEN`, requires read access, pins GitHub.com explicitly, and disables
+prompts/debug output for its child commands. Resolve Latest once through
+`gh release view`, validate the same stable group tag, then download the exact
+binary and checksum names with `gh release download`. Suppress child diagnostics
+that could reflect credentials and report the failed operation without secrets.
+Authentication or partial-download failure must preserve the installed binary;
+never fall back to anonymous retrieval. Help and uninstall remain offline and
+require neither gh nor authentication.
+
+Keep one shared checksum, staging, destination privilege and cleanup path after
+retrieval. Do not copy installer algorithms into private products. Public curl
+behavior and required regression cases remain in force. Qualify configuration
+selection, stored-login/token transport, exact host/tag/assets, rejection and
+partial failures, checksum enforcement and credential redaction with isolated
+fixtures; actual private repository installation remains a consumer acceptance.
+This transient technical operation adds no persisted business lifecycle or
+Header-Detail record.

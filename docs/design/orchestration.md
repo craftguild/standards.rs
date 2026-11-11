@@ -47,6 +47,16 @@ is its exact declared bundle tree. Build and install share this resolver. Every
 artifact may declare preparation `dependencies` by artifact id; the engine
 topologically orders them and rejects missing dependencies and cycles.
 
+Execution has no implicit elapsed-time deadline. An explicit build/prepare
+`--timeout SECONDS` bounds each invoked command; ordinary test/check imposes no
+one-hour cap. Product watchdogs remain independent. On cancellation, send TERM
+and allow five seconds for command wrappers to reap nested owned sessions before
+forcing the original group to stop and verifying its termination.
+Observe leader exit without reaping it, retain its PID through the final group
+signal, then reap with a bounded cleanup wait. Unknown wait ownership fails
+cleanup without signaling a potentially reused number. Never send another
+termination signal after reaping; later group probes may only prevent rollback.
+
 Schema 2 also allows a build `output` template below the selected target
 directory. Substitutions are `{target}`, `{target_path}`, `{profile}`, `{command}`
 and `{exe}`. `target_path` is `<target>/` when a target was explicitly selected,

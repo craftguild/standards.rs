@@ -1,4 +1,4 @@
-//! Cancellable subprocesses with isolated process groups and bounded execution.
+//! Cancellable subprocesses with isolated groups and optional caller deadlines.
 
 use craftguild_core::Result;
 #[cfg(unix)]
@@ -38,7 +38,7 @@ pub fn now() -> u128 {
         .as_millis()
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Runner {
     pub cleanup_failed: Arc<AtomicBool>,
     pub env: BTreeMap<String, String>,
@@ -47,22 +47,7 @@ pub struct Runner {
     pub compiler_version: Option<String>,
     pub log: Option<PathBuf>,
     pub cancel_file: Option<PathBuf>,
-    pub timeout: Duration,
-}
-
-impl Default for Runner {
-    fn default() -> Self {
-        Self {
-            cleanup_failed: Arc::default(),
-            env: BTreeMap::new(),
-            unset_env: BTreeSet::new(),
-            toolchain: None,
-            compiler_version: None,
-            log: None,
-            cancel_file: None,
-            timeout: Duration::from_secs(3600),
-        }
-    }
+    pub timeout: Option<Duration>,
 }
 
 impl Runner {
@@ -94,6 +79,17 @@ impl Runner {
         }
         #[cfg(unix)]
         {
+            if cfg!(any(
+                target_os = "cygwin",
+                target_os = "horizon",
+                target_os = "openbsd",
+                target_os = "redox",
+                target_os = "wasi"
+            )) {
+                return Err(
+                    "Owned subprocess execution requires non-reaping exit observation".into(),
+                );
+            }
             self.check()?;
             let mut effective = argv.to_vec();
             if matches!(argv.first().map(String::as_str), Some("cargo" | "rustc")) {
@@ -137,7 +133,7 @@ impl Runner {
                     return Err(format!("Cannot execute required tool {program}: {error}").into());
                 }
             };
-            let result = (|| -> Result<Vec<u8>> {
+            let waited = (|| -> Result<()> {
                 if let Some(path) = &active {
                     std::fs::write(path, child.id().to_string())?;
                 }
@@ -145,8 +141,10 @@ impl Runner {
                     json!({"argv":effective,"state":"spawned","pid":child.id(),"at":now()}),
                 )?;
                 let started = Instant::now();
-                let status = loop {
-                    if self.cancelled() || started.elapsed() >= self.timeout {
+                loop {
+                    if self.cancelled()
+                        || self.timeout.is_some_and(|limit| started.elapsed() >= limit)
+                    {
                         return Err(if self.cancelled() {
                             "Execution cancelled"
                         } else {
@@ -154,42 +152,42 @@ impl Runner {
                         }
                         .into());
                     }
-                    match child.try_wait() {
-                        Ok(Some(status)) => break status,
-                        Ok(None) => std::thread::sleep(Duration::from_millis(10)),
-                        Err(error) => return Err(error.into()),
+                    if leader_exited(&child)? {
+                        return Ok(());
                     }
-                };
-                stdout.seek(SeekFrom::Start(0))?;
-                stderr.seek(SeekFrom::Start(0))?;
-                let mut bytes = Vec::new();
-                stdout.read_to_end(&mut bytes)?;
-                let mut errors = Vec::new();
-                stderr.read_to_end(&mut errors)?;
-                self.event(
-                    json!({"argv":effective,"stdout":String::from_utf8_lossy(&bytes),
-                "stderr":String::from_utf8_lossy(&errors),"status":status.code(),"at":now()}),
-                )?;
-                if !status.success() {
-                    std::io::stderr().write_all(&bytes)?;
-                    std::io::stderr().write_all(&errors)?;
-                    return Err(format!(
-                        "Required command failed ({status}): {}",
-                        effective.join(" ")
-                    )
-                    .into());
+                    std::thread::sleep(Duration::from_millis(10));
                 }
-                std::io::stderr().write_all(&errors)?;
-                Ok(bytes)
             })();
             // Even an exited leader may leave writers behind. Stop and wait for its
             // owned group on every path, including success and logging/read failures.
             let result = match terminate(&mut child) {
-                Ok(()) => {
+                Ok(status) => {
                     if let Some(path) = &active {
                         std::fs::remove_file(path)?;
                     }
-                    result
+                    waited.and_then(|()| {
+                        stdout.seek(SeekFrom::Start(0))?;
+                        stderr.seek(SeekFrom::Start(0))?;
+                        let mut bytes = Vec::new();
+                        stdout.read_to_end(&mut bytes)?;
+                        let mut errors = Vec::new();
+                        stderr.read_to_end(&mut errors)?;
+                        self.event(
+                            json!({"argv":effective,"stdout":String::from_utf8_lossy(&bytes),
+                            "stderr":String::from_utf8_lossy(&errors),"status":status.code(),"at":now()}),
+                        )?;
+                        if !status.success() {
+                            std::io::stderr().write_all(&bytes)?;
+                            std::io::stderr().write_all(&errors)?;
+                            return Err(format!(
+                                "Required command failed ({status}): {}",
+                                effective.join(" ")
+                            )
+                            .into());
+                        }
+                        std::io::stderr().write_all(&errors)?;
+                        Ok(bytes)
+                    })
                 }
                 Err(error) => {
                     self.cleanup_failed.store(true, Ordering::SeqCst);
@@ -239,27 +237,92 @@ impl Runner {
 }
 
 #[cfg(unix)]
-fn terminate(child: &mut std::process::Child) -> Result<()> {
+fn leader_exited(child: &std::process::Child) -> Result<bool> {
+    #[cfg(not(any(
+        target_os = "cygwin",
+        target_os = "horizon",
+        target_os = "openbsd",
+        target_os = "redox",
+        target_os = "wasi"
+    )))]
+    {
+        use rustix::process::{waitid, Pid, WaitId, WaitIdOptions};
+        loop {
+            // Keep the leader's PID reserved through the final process-group signal.
+            match waitid(
+                WaitId::Pid(Pid::from_child(child)),
+                WaitIdOptions::EXITED | WaitIdOptions::NOHANG | WaitIdOptions::NOWAIT,
+            ) {
+                Ok(status) => return Ok(status.is_some()),
+                Err(rustix::io::Errno::INTR) => continue,
+                Err(error) => {
+                    return Err(format!("Cannot observe owned child exit: {error}").into())
+                }
+            }
+        }
+    }
+    #[cfg(any(
+        target_os = "cygwin",
+        target_os = "horizon",
+        target_os = "openbsd",
+        target_os = "redox",
+        target_os = "wasi"
+    ))]
+    {
+        let _ = child;
+        Err("Non-reaping child exit observation is unavailable".into())
+    }
+}
+
+#[cfg(unix)]
+fn terminate(child: &mut std::process::Child) -> Result<std::process::ExitStatus> {
     use nix::{
         errno::Errno,
         sys::signal::{killpg, Signal},
         unistd::Pid,
     };
-    match killpg(Pid::from_raw(child.id().try_into()?), Signal::SIGKILL) {
+    // Unknown custody must fail before any signal to a potentially reused number.
+    leader_exited(child)?;
+    let group = Pid::from_raw(child.id().try_into()?);
+    // Product command wrappers may own nested sessions. Give their cancellation
+    // handlers time to reap those children before forcing our group to stop.
+    match killpg(group, Signal::SIGTERM) {
         Ok(()) | Err(Errno::ESRCH) => {}
         #[cfg(target_os = "macos")]
         Err(Errno::EPERM) if !group_live(child.id())? => {}
         Err(error) => return Err(error.into()),
     }
-    child.wait()?;
+    let grace = Instant::now() + Duration::from_secs(5);
+    while Instant::now() < grace {
+        if leader_exited(child)? {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    match killpg(group, Signal::SIGKILL) {
+        Ok(()) | Err(Errno::ESRCH) => {}
+        #[cfg(target_os = "macos")]
+        Err(Errno::EPERM) if !group_live(child.id())? => {}
+        Err(error) => return Err(error.into()),
+    }
+    // No destructive signal is permitted after releasing the leader's wait ownership.
     let deadline = Instant::now() + Duration::from_secs(5);
+    let status = loop {
+        if let Some(status) = child.try_wait()? {
+            break status;
+        }
+        if Instant::now() >= deadline {
+            return Err("Owned subprocess leader was not reaped after termination".into());
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    };
     while group_live(child.id())? {
         if Instant::now() >= deadline {
             return Err("Owned subprocess group is still live after termination".into());
         }
         std::thread::sleep(Duration::from_millis(10));
     }
-    Ok(())
+    Ok(status)
 }
 
 #[cfg(unix)]
@@ -304,3 +367,11 @@ fn macos_group_live(pid: u32) -> Result<bool> {
 #[cfg(all(test, target_os = "macos"))]
 #[path = "../tests/unit/execution_process.rs"]
 mod tests;
+
+#[cfg(all(test, unix))]
+#[path = "../tests/unit/execution_deadline.rs"]
+mod deadline_tests;
+
+#[cfg(all(test, unix))]
+#[path = "../tests/unit/execution_custody.rs"]
+mod custody_tests;

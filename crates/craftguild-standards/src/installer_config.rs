@@ -15,6 +15,14 @@ pub enum RustOutputLayout {
     Standard,
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum InstallerTransport {
+    #[default]
+    Curl,
+    GithubCli,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Installer {
@@ -22,6 +30,8 @@ pub struct Installer {
     pub repository: String,
     pub release_group: String,
     pub output: String,
+    #[serde(default)]
+    pub transport: InstallerTransport,
 }
 
 pub fn owns(group: &Group, artifact: &Artifact) -> bool {

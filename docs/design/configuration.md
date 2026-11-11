@@ -179,9 +179,12 @@ settings before enabling the mode; even matching explicit overrides are rejected
 Frontend bundle locations are unchanged. Without this setting schema 1/2 retains
 its previous layout behavior. Candidate caches remain private build inputs.
 
-Optional schema 2 `[[installers]]` declarations contain exactly `artifact`,
+Optional schema 2 `[[installers]]` declarations require `artifact`,
 `repository` (GitHub owner/repo), `release_group` and `output` (a safe relative
-script path). The artifact must be an executable Rust artifact whose package and
+script path). The optional `transport` is `curl` by default or `github-cli` for
+authenticated GitHub.com releases; other values and unknown fields fail.
+Authentication comes from an existing `gh` login or `GH_TOKEN`, never configuration
+credentials. The artifact must be an executable Rust artifact whose package and
 lockfile belong to that release group. Artifact and output ownership are unique;
 unknown references, libraries, frontends, overlapping outputs and unsafe paths
 fail. For example:

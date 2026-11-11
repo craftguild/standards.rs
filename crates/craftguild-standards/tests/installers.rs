@@ -67,3 +67,22 @@ fn strict_declarations_and_deterministic_drift_check() {
         assert!(installer::generate(root.path(), &config, None, false).is_err());
     }
 }
+
+#[test]
+fn private_transport_is_explicit_and_rejects_unknown_authentication_modes() {
+    let root = tempfile::tempdir().unwrap();
+    let config: Config = toml::from_str(&format!("{CONFIG}transport=\"github-cli\"\n")).unwrap();
+    config.validate().unwrap();
+    installer::generate(root.path(), &config, None, false).unwrap();
+    let path = root.path().join("scripts/install.sh");
+    let script = std::fs::read_to_string(&path).unwrap();
+    assert!(script.contains("transport='github-cli'"));
+    assert!(script.contains("repository='owner/repo'"));
+    installer::generate(root.path(), &config, None, true).unwrap();
+    let public: Config = toml::from_str(CONFIG).unwrap();
+    installer::generate(root.path(), &public, None, false).unwrap();
+    assert!(std::fs::read_to_string(path)
+        .unwrap()
+        .contains("transport='curl'"));
+    assert!(toml::from_str::<Config>(&format!("{CONFIG}transport=\"basic\"\n")).is_err());
+}

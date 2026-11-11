@@ -1,6 +1,6 @@
 # ADR 0006: Initializer CLI and controlled engine upgrades
 
-Status: Accepted; implemented in source
+Status: Accepted; published in v0.5.0; product integration criteria clarified 2026-11-07
 
 Date: 2026-11-07
 
@@ -142,6 +142,52 @@ local-only source integrity ledgers, standard Rust output paths and Rust 1.85
 compatibility for public consumer libraries. ADR 0005's release policy is unchanged;
 this breaking 0.x change does not itself authorize a 1.0.0 release.
 
+## Product integration and local completion
+
+For v0.5.0 adoption, fix both command roles and common Rust dependencies to
+`69ef0ba960e4d61bff3f363c07f8d49c4d53d77e`, published in the
+[v0.5.0 release](https://github.com/craftguild/standards/releases/tag/v0.5.0).
+The normative baseline remains 0.1.0; configuration schema 2 and reference schema
+3 are separate. This section clarifies integration obligations without changing
+the published engine or expanding a product's authorized execution scope.
+The product includes `standards/make/common.mk`, which dispatches through
+`standards/launcher.py` to the verified full engine in `.craftguild/engine/`.
+
+Initialization prepares integration. A successful init, setup or prime is not
+product conformance. Apply these criteria to the final product source:
+
+| Criterion | Required local evidence |
+| --- | --- |
+| I1 — Fixed identity | One `standards/engine.json`, matching managed entry/Skill/common AGENTS block, and common Rust dependencies at the selected full revision; distinguish package version, normative baseline and protocols. |
+| I2 — Connected operations | Product Make aliases and CI use the pinned launcher. Configuration declares real artifacts, bounded product hooks, source roles, language gates and release ownership. Retire copied rules, archives, old pin authorities and custom common loaders; preserve product-owned content. |
+| I3 — Standalone workflow | An isolated export of the current intended public source works without sibling checkouts, private archives or a global engine. After explicit setup and locked dependency preparation, prime and ordinary operations use the verified cache without automatic engine/toolchain/SDK acquisition. |
+| I4 — Actual artifacts | Build the actual product in debug and release profiles and contractually required targets at standard Rust output paths. Verify artifact-specific SBOM and identity, relevant offline CLI/machine interfaces, and copy-only installation into an owned temporary destination. Preserve existing library, SDK and payload contracts. |
+| I5 — Product quality | Final `make check` and applicable actual acceptance succeed. Preserve domain, ABI, resource, generated ownership and isolated canonical reproduction checks. Shared engine/acquisition/output/receipt/release/font/measurement regressions belong in standards with neutral fixtures; do not replicate their failure matrices in consumers. |
+| I6 — Maintained delivery | Documentation, dependency boundaries and licenses match the integration. Measure changed implementation with the common Code convention, excluding tests and design documents by role. Declared installer scripts pass the common generation check; release configuration uses ADR 0005 without a local release algorithm. |
+| I7 — Current evidence | Record source/HEAD/index basis, exact engine pin, commands, profiles, hosts, receipts and remaining qualification in the existing task system. Old-version results, incomplete prime, skipped checks and configuration inspection alone are not passing evidence. Required failing or missing local gates block completion. |
+| I8 — Execution boundary | Local integration completion is distinct from signed commit, real release preparation, clean-HEAD packaging and publication. Honor the active request's pause and signing rules. Never fabricate a clean tree or release receipt to satisfy packaging. |
+
+These criteria clarify product adoption without modifying published v0.5.0 assets
+or treating the release's own qualification as product evidence. Keep execution
+status and qualification milestones in the existing task system. Maintaining an
+ADR or goal prompt does not by itself resume, pause or complete implementation.
+
+Use existing product checks and one final-source integration pass. Add consumer
+tests only for a concrete product connection risk not already covered. Re-run
+expensive checks when changed inputs, failures or unresolved concerns justify it;
+do not introduce a new build-test suite in every repository. A source export can
+include intended uncommitted changes but must exclude caches and private state;
+report its unknown/dirty Git identity honestly rather than calling it a clean clone.
+Additional unavailable host/SDK qualification stays explicitly deferred and is
+never reported as passed. No native Windows host qualification is introduced.
+
+Legacy `standards/manifest.json` or `standards/execution/engine.json` requires
+explicit preservation and retirement before init. Force does not migrate those
+bundles, overwrite consumer edits or update Cargo/npm declarations. Preserve the
+current index and unrelated work throughout migration. For a fresh clone of an
+already integrated repository, explicit setup restores only its fixed cache;
+the global initializer is not a runtime or build prerequisite.
+
 ## Acceptance and rollout
 
 - Cover fresh init and both force modes across older, equal and newer versions,
@@ -165,6 +211,7 @@ this breaking 0.x change does not itself authorize a 1.0.0 release.
 
 Implementation is tracked in bd as `standards-2bi`. Source qualification and
 unexecuted hosts are recorded in the [verification guide](../guides/verification.md#adr-0006-source-qualification-2026-11-07).
-This does not qualify a published release. Product adoption, real-user installation,
+That source qualification did not itself qualify publication. The v0.5.0 release
+and product integration are separate evidence boundaries. Product adoption, real-user installation,
 stage/commit, release preparation, tag, push, remote CI execution and publication
 remain outside this implementation request.

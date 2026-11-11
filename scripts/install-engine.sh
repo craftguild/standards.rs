@@ -4,6 +4,7 @@ set -eu
 command_name='craftguild-standards-engine'
 repository='craftguild/standards'
 tag_prefix='v'
+transport='curl'
 version=''
 version_set=0
 bindir_set=0
@@ -14,6 +15,10 @@ staged=''
 privileged=0
 
 fail() { printf '%s\n' "$*" >&2; exit 1; }
+github() {
+    # Reuse gh login or GH_TOKEN, pin the host and suppress credential-bearing diagnostics.
+    GH_HOST=github.com GH_PROMPT_DISABLED=1 GH_PAGER=cat GH_DEBUG= DEBUG= gh "$@" 2>/dev/null
+}
 destination_op() {
     if [ "$privileged" = 1 ]; then sudo "$@"; else "$@"; fi
 }
@@ -111,16 +116,23 @@ case "$(uname -m)" in
     *) fail 'Unsupported architecture' ;;
 esac
 target=$architecture-$system
-command -v curl >/dev/null 2>&1 || fail 'curl is required'
+if [ "$transport" = github-cli ]; then
+    command -v gh >/dev/null 2>&1 || fail 'GitHub CLI (gh) is required; use gh auth login or GH_TOKEN'
+else command -v curl >/dev/null 2>&1 || fail 'curl is required'; fi
 if command -v sha256sum >/dev/null 2>&1; then hash_tool=sha256sum
 elif command -v shasum >/dev/null 2>&1; then hash_tool=shasum
 else fail 'sha256sum or shasum is required'; fi
 if [ "$version_set" = 0 ]; then
-    latest=$(curl -fsSL --proto '=https' --proto-redir '=https' -o /dev/null -w '%{url_effective}' "https://github.com/$repository/releases/latest")
-    case "$latest" in
-        "https://github.com/$repository/releases/tag/"*) tag=${latest#"https://github.com/$repository/releases/tag/"} ;;
-        *) fail 'Invalid Latest Release redirect; use --version X.Y.Z' ;;
-    esac
+    if [ "$transport" = github-cli ]; then
+        tag=$(github release view --repo "github.com/$repository" --json tagName --jq .tagName) \
+            || fail 'GitHub Latest Release lookup failed; check authentication, repository access and connectivity'
+    else
+        latest=$(curl -fsSL --proto '=https' --proto-redir '=https' -o /dev/null -w '%{url_effective}' "https://github.com/$repository/releases/latest")
+        case "$latest" in
+            "https://github.com/$repository/releases/tag/"*) tag=${latest#"https://github.com/$repository/releases/tag/"} ;;
+            *) fail 'Invalid Latest Release redirect; use --version X.Y.Z' ;;
+        esac
+    fi
     case "$tag" in
         "$tag_prefix"*) version=${tag#"$tag_prefix"} ;;
         *) fail 'Latest Release belongs to another group; use --version X.Y.Z' ;;
@@ -130,13 +142,19 @@ else tag=$tag_prefix$version; fi
 asset=$command_name-v$version-$target
 download=$(mktemp -d "${TMPDIR:-/tmp}/$command_name-download.XXXXXX")
 base=https://github.com/$repository/releases/download/$tag
-curl -fsSL --proto '=https' --proto-redir '=https' "$base/$asset" -o "$download/$asset"
-curl -fsSL --proto '=https' --proto-redir '=https' "$base/SHA256SUMS-$target.txt" -o "$download/checksums"
+if [ "$transport" = github-cli ]; then
+    github release download "$tag" --repo "github.com/$repository" --dir "$download" \
+        --pattern "$asset" --pattern "SHA256SUMS-$target.txt" >/dev/null \
+        || fail 'GitHub Release asset download failed; check authentication, repository access and connectivity'
+else
+    curl -fsSL --proto '=https' --proto-redir '=https' "$base/$asset" -o "$download/$asset"
+    curl -fsSL --proto '=https' --proto-redir '=https' "$base/SHA256SUMS-$target.txt" -o "$download/SHA256SUMS-$target.txt"
+fi
 expected=$(LC_ALL=C awk -v asset="$asset" '
     NF != 2 || length($1) != 64 || $1 ~ /[^0-9a-fA-F]/ { bad=1 }
     $2 == asset { count++; hash=tolower($1) }
     END { if (bad || count != 1) exit 1; print hash }
-' "$download/checksums") || fail 'Missing, duplicate or malformed checksum entry'
+' "$download/SHA256SUMS-$target.txt") || fail 'Missing, duplicate or malformed checksum entry'
 if [ "$hash_tool" = sha256sum ]; then
     actual=$(sha256sum "$download/$asset")
 else actual=$(shasum -a 256 "$download/$asset"); fi

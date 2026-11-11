@@ -1,6 +1,7 @@
 # ADR 0002: Build orchestration in standards
 
-Status: Accepted; bundle distribution superseded by [ADR 0004](0004-repository-initialization-and-prime.md)
+Status: Accepted; delivery and CLI entry updated by [ADR 0004](0004-repository-initialization-and-prime.md)
+and [ADR 0006](0006-initializer-cli-and-controlled-engine-upgrades.md)
 
 Extends [ADR 0001](0001-artifact-identity-and-offline-presentation.md).
 The implementation uses versioned configuration, seals and an entry protocol.
@@ -77,27 +78,30 @@ explicit prerequisites; an ordinary build must not silently acquire them.
 
 ### Make and CI use the same engine
 
-Standards distributes a common Makefile and launcher with a pinned compatible
-engine revision. A fresh standalone checkout contains the entry files and can
-obtain the matching tool in a repository-local cache. A sibling standards
-checkout, personal absolute paths and mutable remote Makefile includes are not
-prerequisites.
+The v0.5.0 initializer creates a fixed engine reference and thin common Make/Python
+entry. Explicit init or setup acquires the verified engine in a repository-local
+cache. Ordinary operations use that cache without downloading or updating it.
+A standalone checkout needs the committed entry and explicit setup, without a
+sibling standards checkout, global engine or copied rules/binary archive.
 
 The compatible product entry is:
 
 ```makefile
-include standards/execution/make/common.mk
+include standards/make/common.mk
 ```
 
-This path is implemented in source, not available in v0.1.0. A product Makefile may add aliases
-that delegate to the engine. It must not reproduce orchestration. Make, direct
-tool invocation and CI execute the same configured operations and validations.
+This replaces the former bundle entry path; historical releases are unchanged.
+A product Makefile may add aliases that delegate to the engine. It must not
+reproduce orchestration. Make, the pinned launcher and CI execute the same
+configured operations and validations through `craftguild-standards-engine`.
+The installed `craftguild-standards` only initializes or updates that entry.
 
 ### Preserve compatibility and technical provenance
 
-Migration preserves documented product targets, output locations, toolchain
-boundaries and platform prerequisites through explicit configuration or forwarding
-aliases. `TARGET`, `CARGO_TARGET_DIR`, `PREFIX`, `BINDIR` and `DESTDIR` retain their
+Migration preserves documented product targets, toolchain boundaries and platform
+prerequisites through explicit configuration or forwarding aliases. New adoption
+uses ADR 0003's standard Rust output layout and updates callers of old output
+locations explicitly. `TARGET`, `CARGO_TARGET_DIR`, `PREFIX`, `BINDIR` and `DESTDIR` retain their
 documented behavior. Artifact discovery and installation use one shared output
 resolver.
 
@@ -155,11 +159,14 @@ Implementation must demonstrate:
 - Build and evidence refresh after release preparation preserve its planned-file
   boundary and do not cause another version increment.
 
-Keep the published v0.1.0 revision intact. Implement and verify the engine and
-entry bundle in a compatible release, then migrate products using its pinned
-revision. ADR acceptance, engine implementation and product adoption are separate
-steps. The implementation uses configuration schema 2 and entry protocol
-`craftguild-execution-1`, with real Rust/npm consumers and isolated product pilots.
+Keep historical published revisions intact. The original bundle implementation
+is historical evidence; v0.5.0 integration follows ADR 0006's initializer and fixed
+engine entry. ADR acceptance, engine implementation and product adoption are
+separate steps. Configuration schema 2, reference schema 3, entry protocol
+`craftguild-entry-1` and execution protocol `craftguild-execution-1` are distinct.
+Use the [product integration criteria](0006-initializer-cli-and-controlled-engine-upgrades.md#product-integration-and-local-completion)
+for current adoption, rather than treating successful init as completion.
+The original implementation used real Rust/npm consumers and isolated product pilots.
 Execution contracts are defined in the [design](../design/orchestration.md);
 verification evidence and unexecuted host gates are recorded in `bd` issue
 `standards-fcr`. Acceptance of this decision does not certify foreign platforms or

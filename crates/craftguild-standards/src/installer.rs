@@ -3,6 +3,7 @@
 use crate::{
     config::{self, Config},
     distribution::atomic_write,
+    installer_config::InstallerTransport,
 };
 use craftguild_core::{paths, Result};
 use std::path::Path;
@@ -10,10 +11,21 @@ use std::path::Path;
 const TEMPLATE: &str = include_str!("installer.sh");
 
 pub fn script(command: &str, repository: &str, prefix: &str) -> String {
+    render(command, repository, prefix, InstallerTransport::Curl)
+}
+
+fn render(command: &str, repository: &str, prefix: &str, transport: InstallerTransport) -> String {
     TEMPLATE
         .replace("@COMMAND@", command)
         .replace("@REPOSITORY@", repository)
         .replace("@PREFIX@", prefix)
+        .replace(
+            "@TRANSPORT@",
+            match transport {
+                InstallerTransport::Curl => "curl",
+                InstallerTransport::GithubCli => "github-cli",
+            },
+        )
 }
 
 pub fn generate(root: &Path, config: &Config, selected: Option<&str>, check: bool) -> Result<()> {
@@ -47,7 +59,12 @@ pub fn generate(root: &Path, config: &Config, selected: Option<&str>, check: boo
             .iter()
             .find(|g| g.id == installer.release_group)
             .ok_or("Unknown installer release group")?;
-        let expected = script(&artifact.command, &installer.repository, &group.tag_prefix);
+        let expected = render(
+            &artifact.command,
+            &installer.repository,
+            &group.tag_prefix,
+            installer.transport,
+        );
         let path = root.join(&installer.output);
         if check {
             if std::fs::read(&path).ok().as_deref() != Some(expected.as_bytes()) {

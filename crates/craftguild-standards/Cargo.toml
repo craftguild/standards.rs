@@ -43,6 +43,7 @@ ctrlc = { version = "=3.5.2", features = ["termination"] }
 
 [target.'cfg(unix)'.dependencies]
 nix = { version = "=0.31.3", features = ["signal", "process"] }
+rustix = { version = "=1.1.6", features = ["process"] }
 
 [build-dependencies]
 craftguild-cli-build.workspace = true

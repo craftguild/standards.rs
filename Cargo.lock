@@ -185,6 +185,7 @@ dependencies = [
  "nix",
  "proc-macro2",
  "quote",
+ "rustix",
  "semver",
  "serde",
  "serde_json",

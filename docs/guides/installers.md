@@ -71,8 +71,8 @@ is stable `X.Y.Z`, without the tag prefix. Check asset availability for the targ
 `--help` needs no network. Duplicate, unknown and incomplete options fail;
 `--version` cannot accompany `--uninstall`.
 
-The installer needs POSIX sh, curl, standard utilities (including mktemp and awk),
-and sha256sum or shasum. Darwin/Linux and x86_64/amd64/arm64/aarch64 map to
+The default installer needs POSIX sh, curl, standard utilities (including mktemp
+and awk), and sha256sum or shasum. Darwin/Linux and x86_64/amd64/arm64/aarch64 map to
 `x86_64-apple-darwin`, `aarch64-apple-darwin`,
 `x86_64-unknown-linux-gnu` and `aarch64-unknown-linux-gnu`. Other systems fail;
 Linux does not fall back to musl.
@@ -94,9 +94,36 @@ creation, placement, deletion and cleanup commands use sudo with separate argv.
 Authentication or placement failure preserves the old binary. The script reports
 a missing PATH entry without editing shell startup files.
 
-Uninstall needs no curl, hash tool or OS/architecture probe. It removes only the
+Uninstall needs no curl, gh, hash tool or OS/architecture probe. It removes only the
 regular file at the command destination; absence succeeds, directories and
 symlinks fail. Settings, data, unrelated commands and directories remain.
 
 Source-build `make install` is a separate copy-only operation with the existing
 `PREFIX`/`BINDIR`/`DESTDIR` contract and `/usr/local/bin` default.
+
+## Private GitHub releases
+
+Add `transport = "github-cli"` to a private repository's existing `[[installers]]`
+declaration and regenerate its script with `make installer`. The default remains
+`curl`; setting a token does not silently change a public installer's transport.
+
+This mode needs GitHub CLI (`gh`) instead of curl, plus the same POSIX utilities
+and hash tool. Authenticate with `gh auth login --hostname github.com`, or provide
+`GH_TOKEN` through the environment. The token or login must grant read access to
+the selected private repository and its release assets. In GitHub Actions, the
+repository's `GITHUB_TOKEN` can be passed as `GH_TOKEN` with `contents: read`.
+See [GitHub CLI authentication](https://cli.github.com/manual/gh_help_environment).
+
+Fetch the selected tag's installer through an authenticated GitHub contents
+request or an authorized source checkout. The generated script uses the same
+`--version`, `--bindir` and `--uninstall` options. It never performs a login,
+prompts for credentials, accepts a token argument or writes authentication config.
+
+The repository host is fixed to GitHub.com. Latest selects one tag through
+`gh release view`; every exact binary/checksum request then uses that tag through
+`gh release download`. Debug output and interactive prompts are disabled in these
+child commands. Authentication, access and network failures stop installation
+with a generic operation-specific error, suppressing credential-bearing command
+diagnostics. There is no anonymous fallback. Existing checksum validation,
+atomic placement, destination-only sudo and temporary-file cleanup are shared
+with the public transport. Help and uninstall do not need gh or authentication.

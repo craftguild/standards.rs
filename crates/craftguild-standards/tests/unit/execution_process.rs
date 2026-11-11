@@ -14,12 +14,15 @@ use std::{
 struct OwnedGroup {
     leader: Child,
     zombie: Option<Child>,
+    termination_attempted: bool,
 }
 
 impl Drop for OwnedGroup {
     fn drop(&mut self) {
-        let _ = killpg(Pid::from_raw(self.leader.id() as i32), Signal::SIGKILL);
-        let _ = self.leader.wait();
+        if !self.termination_attempted && super::leader_exited(&self.leader).is_ok() {
+            let _ = killpg(Pid::from_raw(self.leader.id() as i32), Signal::SIGKILL);
+            let _ = self.leader.wait();
+        }
         if let Some(zombie) = &mut self.zombie {
             let _ = zombie.wait();
         }
@@ -39,6 +42,7 @@ fn zombie_only_owned_group_is_terminal_despite_eperm() {
     let mut group = OwnedGroup {
         leader,
         zombie: None,
+        termination_attempted: false,
     };
     let pgid = Pid::from_raw(group.leader.id() as i32);
     group.zombie = Some(
@@ -76,10 +80,14 @@ fn zombie_only_owned_group_is_terminal_despite_eperm() {
     // A group containing a live leader must still prevent rollback.
     assert!(super::group_live(group.leader.id()).unwrap());
     killpg(pgid, Signal::SIGKILL).unwrap();
-    group.leader.wait().unwrap();
+    while !super::leader_exited(&group.leader).unwrap() {
+        assert!(Instant::now() < deadline, "Owned leader did not exit");
+        std::thread::sleep(Duration::from_millis(5));
+    }
     // Keep the other child unreaped so this kernel state cannot race launchd.
     assert_eq!(killpg(pgid, None), Err(Errno::EPERM));
     assert!(!super::group_live(group.leader.id()).unwrap());
     // The initial termination signal encounters the same EPERM state as well.
+    group.termination_attempted = true;
     super::terminate(&mut group.leader).unwrap();
 }
