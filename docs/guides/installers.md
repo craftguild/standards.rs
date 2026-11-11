@@ -45,10 +45,10 @@ hashes every asset except checksum files. Local source ledgers stay local.
 ## Download installation
 
 Use the raw script from the selected release tag, rather than a GitHub HTML blob
-page. These examples select v0.5.0 and default to `~/.local/bin`:
+page. These examples select v0.6.0 and default to `~/.local/bin`:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.5.0/scripts/install.sh | sh -s -- --version 0.5.0
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --version 0.6.0
 "$HOME/.local/bin/craftguild-standards" init
 ```
 
@@ -62,8 +62,8 @@ only when destination operations need elevation. Uninstall removes only the
 initializer binary, preserving settings and repository engine caches:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.5.0/scripts/install.sh | sh -s -- --version 0.5.0 --bindir /usr/local/bin
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.5.0/scripts/install.sh | sh -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --version 0.6.0 --bindir /usr/local/bin
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --uninstall
 ```
 
 For a custom destination, pass the same `--bindir` when uninstalling. The version
@@ -102,6 +102,8 @@ Source-build `make install` is a separate copy-only operation with the existing
 `PREFIX`/`BINDIR`/`DESTDIR` contract and `/usr/local/bin` default.
 
 ## Private GitHub releases
+
+Authenticated transport requires standards v0.6.0 or later.
 
 Add `transport = "github-cli"` to a private repository's existing `[[installers]]`
 declaration and regenerate its script with `make installer`. The default remains

@@ -1,0 +1,42 @@
+{
+  "schema_version": 2,
+  "group": "standards",
+  "config_hash": "8113c559ced27d8c5a53c99b9dd50a3b20ed7789fd06e17747254ce45694baf4",
+  "head": "e44a9ccf0253ba56a7ea89ea616197c56e1518da",
+  "base": "v0.5.0",
+  "current": "0.5.0",
+  "next": "0.6.0",
+  "tag": "v0.6.0",
+  "bump": "minor",
+  "mode": "normal",
+  "prepared": false,
+  "receipt_path": "docs/releases/v0.6.0.json",
+  "notes": "# v0.6.0\n\nGroup: `standards`\n\nCompare: `v0.5.0` → `e44a9ccf0253ba56a7ea89ea616197c56e1518da`\n\n## Changes\n\n- feat: add authenticated installers and explicit execution deadlines (e44a9ccf0253ba56a7ea89ea616197c56e1518da)\n",
+  "changes": [
+    {
+      "path": "Cargo.toml",
+      "before": "8bab72ad32ab3e283a2b2695a48aabe71dce73475ee3d720be93e5dccba8ea54",
+      "after": "68f4485cfee2cc28fbb261a7590096a110f3c1049a768a5f1c02fea648501e03"
+    },
+    {
+      "path": "Cargo.lock",
+      "before": "65c7c66b72f9007ef14257a702268f4357561b2f578c9ec7384f441ceb54f260",
+      "after": "b674ada45a9cff819d1917c5982d92333427279822305ca5145004f3beb12981"
+    },
+    {
+      "path": "package.json",
+      "before": "d7a8be2cd3524f2a8c966ab8e542aaa995e309a56ccb71ab6499f562255b45d2",
+      "after": "73155f0cddd38bca7ff87cea3dafd841f0e0433aef4b3656e2d0e11ec920a1a9"
+    },
+    {
+      "path": "package-lock.json",
+      "before": "8bd62562d1e8c1d6502d992fc1290c3e77cf24a30b531eaafadc108423f006fb",
+      "after": "65a71b644da337fa8cc7279a155ab332359dde6cea3b40809245e731bbc84cf3"
+    },
+    {
+      "path": "docs/releases/v0.6.0.md",
+      "before": null,
+      "after": "b075a4512f92ac434d54a9b2a6e835060d98c2ded6f4069fc05babd5637c85e6"
+    }
+  ]
+}

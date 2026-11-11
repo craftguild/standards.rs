@@ -15,7 +15,7 @@ Install the initializer with POSIX sh, curl, and sha256sum or shasum available.
 Initialization also needs Python 3. From the root of the repository to initialize:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.5.0/scripts/install.sh | sh -s -- --version 0.5.0
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --version 0.6.0
 "$HOME/.local/bin/craftguild-standards" init
 make prime
 ```
