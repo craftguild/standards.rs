@@ -45,7 +45,7 @@ pub fn check(
                     if !Path::new(path).canonicalize()?.starts_with(&root) {
                         errors.push(("CG-PUB-001".into(),format!("Local dependency escapes the standalone repository: {name} -> {target}")));
                     }
-                    if COMMON.contains(&target) && repository != "craftguild/standards" {
+                    if COMMON.contains(&target) && repository != "craftguild/standards.rs" {
                         errors.push(("CG-PUB-002".into(),format!("Common dependency needs a fixed public standards Git revision: {name} -> {target}")));
                     }
                 }
@@ -56,7 +56,7 @@ pub fn check(
                     let valid = rust_git(source).is_some_and(|url| {
                         !COMMON.contains(&target)
                             || url.trim_end_matches('/').trim_end_matches(".git")
-                                == "https://github.com/craftguild/standards"
+                                == "https://github.com/craftguild/standards.rs"
                     });
                     if !valid {
                         errors.push(("CG-PUB-002".into(),format!("Git dependency needs credential-free HTTPS and a full fixed rev: {name} -> {target}")));

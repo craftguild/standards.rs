@@ -8,7 +8,7 @@ installation, service operations or unrelated dirty-work edits.
 Each adopted repository builds and ordinarily tests from a standalone clone.
 Remove sibling/private-evaluation prerequisites. Product dependencies use their
 official public names and immutable revisions, verified over unauthenticated
-HTTPS. Common crates come from `https://github.com/craftguild/standards` at a full
+HTTPS. Common crates come from `https://github.com/craftguild/standards.rs` at a full
 fixed `rev`, never crates.io or permanent sibling paths.
 
 Preserve evaluation originals and inventory records in ignored, untracked

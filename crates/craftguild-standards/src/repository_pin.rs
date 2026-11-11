@@ -142,7 +142,7 @@ impl Release {
                 _ => return Err("Release artifact roles differ from metadata schema".into()),
             };
             for (command, assets) in roles {
-                let base = format!("https://github.com/craftguild/standards/releases/download/v{}/{command}-v{}-{host}", identity.version, identity.version);
+                let base = format!("https://github.com/craftguild/standards.rs/releases/download/v{}/{command}-v{}-{host}", identity.version, identity.version);
                 for (asset, url) in [
                     (&assets.binary, base.clone()),
                     (&assets.sbom, format!("{base}.bom.json")),

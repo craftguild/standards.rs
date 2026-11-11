@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, warp-macos-26-arm64-6x]
+        os: [warp-ubuntu-2404-x64-4x, warp-macos-26-arm64-6x]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -60,7 +60,7 @@ jobs:
           if-no-files-found: error
   release-index:
     needs: platform
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-2404-x64-2x
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Collect qualified flat host deliveries
@@ -74,7 +74,7 @@ jobs:
           path: target/release-index/*
           if-no-files-found: error
   consumer-msrv:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-2404-x64-4x
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8

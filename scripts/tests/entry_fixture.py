@@ -43,7 +43,7 @@ class EntryFixture:
             shutil.copy2(binary, self.binary)
         else:
             self.fake_binary(self.machine)
-        prefix = f'https://github.com/craftguild/standards/releases/download/v{version}/'
+        prefix = f'https://github.com/craftguild/standards.rs/releases/download/v{version}/'
         engine = {'binary': {'url': prefix + name, 'sha256': digest(self.binary)},
                   'sbom': {'url': prefix + name + '.bom.json', 'sha256': digest(self.sbom)}}
         init_name = f'craftguild-standards-v{version}-{self.machine["target"]}'

@@ -64,7 +64,7 @@ pub fn run(args: &[String], identity: &MachineIdentity, output: &mut impl Write)
         }
         existing.clone().unwrap()
     } else {
-        let url = format!("https://github.com/craftguild/standards/releases/download/v{0}/craftguild-release-v{0}.json", identity.engine.version);
+        let url = format!("https://github.com/craftguild/standards.rs/releases/download/v{0}/craftguild-release-v{0}.json", identity.engine.version);
         let bytes = crate::command::capture(
             &root,
             &[

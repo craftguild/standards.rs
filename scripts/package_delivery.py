@@ -58,7 +58,7 @@ def package(root, destination):
                                   'entry_protocol': 'craftguild-entry-1'}
                 or identity['target'] != target or identity['clean'] is not True):
             raise ValueError('Engine release identity differs from its verified receipt')
-        base = f'https://github.com/craftguild/standards/releases/download/v{version}/'
+        base = f'https://github.com/craftguild/standards.rs/releases/download/v{version}/'
         roles = {}
         for role, command in [('initializer', 'craftguild-standards'),
                               ('engine', 'craftguild-standards-engine')]:

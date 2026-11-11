@@ -58,7 +58,7 @@ def merge(source, destination):
                 for kind, suffix in [('binary', ''), ('sbom', '.bom.json')]:
                     asset = pair[kind]
                     name = stem + suffix
-                    expected_url = f'https://github.com/craftguild/standards/releases/download/v{version}/{name}'
+                    expected_url = f'https://github.com/craftguild/standards.rs/releases/download/v{version}/{name}'
                     artifact = path.parent / name
                     if (set(asset) != {'url', 'sha256'} or asset['url'] != expected_url
                             or artifact.is_symlink() or not artifact.is_file()

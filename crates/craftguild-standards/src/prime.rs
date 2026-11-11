@@ -100,7 +100,7 @@ pub fn links(text: &str, source: &str, revision: &str) -> String {
                 }
             }
             result.push_str(&format!(
-                "https://github.com/craftguild/standards/blob/{revision}/{}",
+                "https://github.com/craftguild/standards.rs/blob/{revision}/{}",
                 parts.join("/")
             ));
         }

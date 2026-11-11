@@ -10,7 +10,7 @@ import subprocess
 
 ROOT_FILES = {
     '.gitignore', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'Cargo.toml',
-    'Cargo.lock', 'Makefile', 'LICENSE-MIT', 'LICENSE-APACHE', 'craftguild.toml',
+    'Cargo.lock', 'Makefile', 'LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE', 'craftguild.toml',
     'package.json', 'package-lock.json',
 }
 TREES = ('.cargo/', '.github/', 'adapters/', 'assets/', 'conformance/', 'crates/', 'docs/',

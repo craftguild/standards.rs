@@ -135,7 +135,7 @@ explicit roles or a retained repository check.
 `manifest`, and optional `npm_lockfiles`. At least one input scope is required.
 It checks every declared dependency kind for standalone local paths and fixed,
 credential-free HTTPS Git sources. Consumer common crates must use the official
-standards Git source; only the owning `craftguild/standards` workspace may use its
+standards Git source; only the owning `craftguild/standards.rs` workspace may use its
 own internal common-crate paths. npm registry sources require integrity records;
 Git sources require full immutable hashes, and local links/files must stay inside
 the source repository. This is static source readiness, not proof of public access:
@@ -192,7 +192,7 @@ fail. For example:
 ```toml
 [[installers]]
 artifact = "standards"
-repository = "craftguild/standards"
+repository = "craftguild/standards.rs"
 release_group = "standards"
 output = "scripts/install.sh"
 ```

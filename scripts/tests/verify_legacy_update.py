@@ -1,4 +1,4 @@
-"""Upgrade the frozen flat reference through the real initialization entry point."""
+"""Refuse the frozen old-repository reference without silently rewriting it."""
 import copy
 import json
 from pathlib import Path
@@ -41,16 +41,8 @@ def verify(base, template, initializer):
     fixture.save()
     run(fixture.root, ['make', 'setup'], fixture.env)
     run(fixture.root, ['make', 'prime'], fixture.env)
-    cache = fixture.cache
-    before = snapshot(cache)
-    for path in template.assets.iterdir():
-        shutil.copy2(path, fixture.assets / path.name)
-    result = run(fixture.root, [initializer, 'init'], fixture.env)
-    assert b'upgrade: 0.0.1 @' in result.stdout
-    selected = json.loads((fixture.entry / 'engine.json').read_bytes())
-    assert selected['schema_version'] == 3 and selected['release']['identity'] == template.machine['engine']
-    assert (fixture.root / 'AGENTS.md').read_text().endswith('Legacy product contract\n')
-    assert snapshot(cache) == before
-    run(fixture.root, ['make', 'prime'], fixture.env)
-    assert 'require `--force`' in (fixture.root / '.agents/skills/craftguild-standardize/SKILL.md').read_text()
-    print('PASS: real initializer upgrades known schema 2 flat pin/entry/Skill/AGENTS, retaining product contract and old valid cache', flush=True)
+    before = snapshot(fixture.root)
+    result = run(fixture.root, [initializer, 'init'], fixture.env, success=False)
+    assert b'Existing fixed reference is incompatible' in result.stderr
+    assert snapshot(fixture.root) == before
+    print('PASS: old-repository reference refuses implicit upgrade and preserves owned files', flush=True)

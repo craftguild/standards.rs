@@ -92,7 +92,7 @@ def reference(root, entry):
     assets = roles['engine']
     if set(assets) != {'binary', 'sbom'}:
         raise ValueError('Invalid engine assets')
-    base = f'https://github.com/craftguild/standards/releases/download/v{version}/craftguild-standards-engine-v{version}-{selected}'
+    base = f'https://github.com/craftguild/standards.rs/releases/download/v{version}/craftguild-standards-engine-v{version}-{selected}'
     for name, suffix in [('binary', ''), ('sbom', '.bom.json')]:
         asset = assets[name]
         if (set(asset) != {'url', 'sha256'} or asset['url'] != base + suffix

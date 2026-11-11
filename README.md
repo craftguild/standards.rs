@@ -21,7 +21,7 @@ Install the initializer with POSIX sh, curl, and sha256sum or shasum available.
 Initialization also needs Python 3. From the root of the repository to initialize:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --version 0.6.0
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards.rs/v0.6.1/scripts/install.sh | sh -s -- --version 0.6.1
 "$HOME/.local/bin/craftguild-standards" init
 make prime
 ```
@@ -60,8 +60,8 @@ separate toolchain. Platform qualification is recorded in the
 - The configured bundler, type checker and language tools for each Web example.
 
 ```sh
-git clone https://github.com/craftguild/standards.git
-cd standards
+git clone https://github.com/craftguild/standards.rs.git
+cd standards.rs
 cargo fetch --locked
 make build
 ```
@@ -135,6 +135,7 @@ Do not publish sensitive vulnerability details in public issues.
 
 ## License
 
-First-party code is licensed under [MIT](LICENSE-MIT) OR
-[Apache-2.0](LICENSE-APACHE). See the [font notice](assets/fonts/NOTICE.md) and
+First-party code is licensed under either the [MIT License](LICENSE-MIT) or the
+[Apache License, Version 2.0](LICENSE-APACHE), at your option.
+See the [font notice](assets/fonts/NOTICE.md) and
 [schema notice](schemas/NOTICE.md) for third-party material.

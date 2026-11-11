@@ -115,7 +115,7 @@ class InstallerTests(unittest.TestCase):
         fixture.run('--bindir', str(fixture.bindir), success=False)
         fixture.publish(b'new verified binary')
         for tag in ['other-v1.2.3', 'v1.2.3-beta', 'v01.2.3', 'nested/v1.2.3']:
-            fixture.env['LATEST'] = 'https://github.com/craftguild/standards/releases/tag/' + tag
+            fixture.env['LATEST'] = 'https://github.com/craftguild/standards.rs/releases/tag/' + tag
             fixture.run('--bindir', str(fixture.bindir), success=False)
             self.assertEqual(binary.read_bytes(), b'old binary')
         fixture.env['LATEST'] = 'https://github.com/another/repo/releases/tag/v1.2.3'

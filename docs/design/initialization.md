@@ -119,3 +119,13 @@ consumer ownership. Common-crate revision changes remain manual adoption work.
 
 This remains a transient provenance/consistency boundary. There is no business
 entity, transition-history table or Header-Detail aggregate (design-baselines).
+
+## Renamed release repository
+
+The release index, role assets and fixed common-crate dependencies use
+`craftguild/standards.rs`. Old repository URLs are not accepted by the current
+initializer. Before explicitly reinitializing an owned consumer, archive and
+verify its old managed entry, remove only that managed entry and common AGENTS
+block, then initialize with the selected published release. Preserve the product
+configuration, product instructions and third-party provenance. This is an
+explicit source migration, not a runtime compatibility path.

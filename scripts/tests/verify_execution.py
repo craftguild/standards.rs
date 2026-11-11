@@ -35,7 +35,7 @@ def consumer(root, name, entry, standard=False):
     for library in ['craftguild-cli', 'craftguild-cli-build', 'craftguild-core']:
         shutil.copytree(ROOT / 'crates' / library, root / 'crates' / library)
     manifest = (root / 'Cargo.toml').read_text().replace('[workspace]\n', '')
-    manifest = re.sub(r'\{ git = "https://github.com/craftguild/standards", rev = "[a-f0-9]+" \}',
+    manifest = re.sub(r'\{ git = "https://github.com/craftguild/standards\.rs", rev = "[a-f0-9]+" \}',
                       lambda m: m.group(0), manifest)
     for library in ['craftguild-cli', 'craftguild-cli-build']:
         manifest = re.sub(library + r' = \{ git = [^\n]+',

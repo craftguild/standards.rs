@@ -10,6 +10,6 @@ publish = false
 name = "embedded-demo"
 path = "src/main.rs"
 [dependencies]
-craftguild-cli = { git = "https://github.com/craftguild/standards", rev = "266b14893251e5fc0ec5879f345ec64cfc0cee70" }
+craftguild-cli = { git = "https://github.com/craftguild/standards.rs", rev = "266b14893251e5fc0ec5879f345ec64cfc0cee70" }
 [build-dependencies]
-craftguild-cli-build = { git = "https://github.com/craftguild/standards", rev = "266b14893251e5fc0ec5879f345ec64cfc0cee70" }
+craftguild-cli-build = { git = "https://github.com/craftguild/standards.rs", rev = "266b14893251e5fc0ec5879f345ec64cfc0cee70" }

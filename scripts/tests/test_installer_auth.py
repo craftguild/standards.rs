@@ -29,7 +29,7 @@ class AuthenticatedInstallerTests(unittest.TestCase):
                 calls = [e for e in fixture.log() if e[0] == 'gh']
                 self.assertEqual(len(calls), 1 if selector else 2)
                 for call in calls:
-                    self.assertEqual(call[call.index('--repo') + 1], 'github.com/craftguild/standards')
+                    self.assertEqual(call[call.index('--repo') + 1], 'github.com/craftguild/standards.rs')
                 self.assertEqual(calls[-1][1:4], ['release', 'download', 'v1.2.3'])
                 self.assertEqual(
                     [calls[-1][i + 1] for i, value in enumerate(calls[-1]) if value == '--pattern'],

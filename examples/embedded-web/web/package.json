@@ -17,5 +17,6 @@
     "typescript": "5.9.3",
     "@types/is-number": "7.0.5",
     "picocolors": "1.1.1"
-  }
+  },
+  "license": "MIT OR Apache-2.0"
 }

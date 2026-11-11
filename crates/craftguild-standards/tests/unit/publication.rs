@@ -5,7 +5,7 @@ use serde_json::json;
 fn fixed_git_sources_reject_mutability_transport_and_credentials() {
     let hash = "1234567890123456789012345678901234567890";
     assert!(rust_git(&format!(
-        "git+https://github.com/craftguild/standards?rev={hash}"
+        "git+https://github.com/craftguild/standards.rs?rev={hash}"
     ))
     .is_some());
     for source in ["git+ssh://git@github.com/example/project?rev=main",

@@ -66,7 +66,7 @@ Schema 2 also gains optional installer declarations, for example:
 
     [[installers]]
     artifact = "standards"
-    repository = "craftguild/standards"
+    repository = "craftguild/standards.rs"
     release_group = "standards"
     output = "scripts/install.sh"
 

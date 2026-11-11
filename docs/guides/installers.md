@@ -48,7 +48,7 @@ Use the raw script from the selected release tag, rather than a GitHub HTML blob
 page. These examples select v0.6.0 and default to `~/.local/bin`:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --version 0.6.0
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards.rs/v0.6.1/scripts/install.sh | sh -s -- --version 0.6.1
 "$HOME/.local/bin/craftguild-standards" init
 ```
 
@@ -62,8 +62,8 @@ only when destination operations need elevation. Uninstall removes only the
 initializer binary, preserving settings and repository engine caches:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --version 0.6.0 --bindir /usr/local/bin
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards/v0.6.0/scripts/install.sh | sh -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards.rs/v0.6.1/scripts/install.sh | sh -s -- --version 0.6.1 --bindir /usr/local/bin
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards.rs/v0.6.1/scripts/install.sh | sh -s -- --uninstall
 ```
 
 For a custom destination, pass the same `--bindir` when uninstalling. The version

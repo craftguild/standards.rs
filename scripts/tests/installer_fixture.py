@@ -87,7 +87,7 @@ class InstallerFixture:
         self.env = dict(os.environ, PATH=str(self.tools), HOME=str(self.home),
                         TMPDIR=str(self.temp), ASSETS=str(self.assets),
                         EVENTS=str(self.events), OS='Darwin', ARCH='arm64',
-                        LATEST='https://github.com/craftguild/standards/releases/tag/v1.2.3')
+                        LATEST='https://github.com/craftguild/standards.rs/releases/tag/v1.2.3')
         for key in ['BINDIR', 'NETWORK_FAIL', 'SUDO_FAIL', 'SIGNAL_AT', 'UID_STUB',
                     'GH_TOKEN', 'GITHUB_TOKEN', 'GH_ENTERPRISE_TOKEN', 'GITHUB_ENTERPRISE_TOKEN',
                     'GH_STORED_AUTH', 'GH_FAIL', 'GH_LATEST_TAG']:

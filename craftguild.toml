@@ -4,13 +4,13 @@ rust_output_layout = "standard"
 
 [[installers]]
 artifact = "standards"
-repository = "craftguild/standards"
+repository = "craftguild/standards.rs"
 release_group = "standards"
 output = "scripts/install.sh"
 
 [[installers]]
 artifact = "standards-engine"
-repository = "craftguild/standards"
+repository = "craftguild/standards.rs"
 release_group = "standards"
 output = "scripts/install-engine.sh"
 
@@ -31,7 +31,7 @@ lockfile = "package-lock.json"
 
 [[policies]]
 kind = "publication"
-repository = "craftguild/standards"
+repository = "craftguild/standards.rs"
 manifest = "Cargo.toml"
 npm_lockfiles = ["package-lock.json", "examples/embedded-web/web/package-lock.json", "examples/independent/frontend/package-lock.json"]
 

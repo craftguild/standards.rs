@@ -20,7 +20,7 @@ fn fixture() -> (tempfile::TempDir, Reference, MachineIdentity) {
     };
     let host = "aarch64-apple-darwin";
     let assets = |command: &str| {
-        let base = format!("https://github.com/craftguild/standards/releases/download/v7.8.9/{command}-v7.8.9-{host}");
+        let base = format!("https://github.com/craftguild/standards.rs/releases/download/v7.8.9/{command}-v7.8.9-{host}");
         HostAssets {
             binary: Asset {
                 url: base.clone(),

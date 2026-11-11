@@ -146,7 +146,7 @@ this breaking 0.x change does not itself authorize a 1.0.0 release.
 
 For v0.5.0 adoption, fix both command roles and common Rust dependencies to
 `69ef0ba960e4d61bff3f363c07f8d49c4d53d77e`, published in the
-[v0.5.0 release](https://github.com/craftguild/standards/releases/tag/v0.5.0).
+[v0.5.0 release](https://github.com/craftguild/standards.rs/releases/tag/v0.5.0).
 The normative baseline remains 0.1.0; configuration schema 2 and reference schema
 3 are separate. This section clarifies integration obligations without changing
 the published engine or expanding a product's authorized execution scope.

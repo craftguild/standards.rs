@@ -1,6 +1,6 @@
 <!-- craftguild:common:start -->
 Use Craftguild standards 0.1.0 and the matching craftguild-standardize workflow.
-Read the [versioned standards](https://github.com/craftguild/standards/tree/v0.1.0/spec)
+Read the [versioned standards](https://github.com/craftguild/standards.rs/tree/v0.1.0/spec)
 or the offline rules shipped with that skill. Run `make check`.
 <!-- craftguild:common:end -->
 
