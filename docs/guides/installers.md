@@ -45,7 +45,7 @@ hashes every asset except checksum files. Local source ledgers stay local.
 ## Download installation
 
 Use the raw script from the selected release tag, rather than a GitHub HTML blob
-page. These examples select v0.6.0 and default to `~/.local/bin`:
+page. These examples select v0.6.1 and default to `~/.local/bin`:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/craftguild/standards.rs/v0.6.1/scripts/install.sh | sh -s -- --version 0.6.1

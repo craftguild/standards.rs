@@ -3,7 +3,6 @@
     "@types/node": "24.10.0",
     "typescript": "5.9.3"
   },
-  "license": "MIT OR Apache-2.0",
   "name": "craftguild-standards-adapters",
   "private": true,
   "scripts": {
@@ -11,5 +10,6 @@
     "test": "node --test adapters/tests/*.test.cjs",
     "typecheck": "tsc --allowJs --checkJs --noEmit --module commonjs --target es2022 --types node adapters/npm-tests.cjs"
   },
-  "version": "0.6.1"
+  "version": "0.6.0",
+  "license": "MIT OR Apache-2.0"
 }
