@@ -139,11 +139,11 @@ dependencies = [
 
 [[package]]
 name = "craftguild-cli"
-version = "0.6.1"
+version = "0.6.2"
 
 [[package]]
 name = "craftguild-cli-build"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "craftguild-core",
  "serde_json",
@@ -152,7 +152,7 @@ dependencies = [
 
 [[package]]
 name = "craftguild-core"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "jsonschema",
  "serde",
@@ -163,7 +163,7 @@ dependencies = [
 
 [[package]]
 name = "craftguild-initializer"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "craftguild-cli",
  "craftguild-cli-build",
@@ -173,7 +173,7 @@ dependencies = [
 
 [[package]]
 name = "craftguild-standards"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "craftguild-cli",
  "craftguild-cli-build",
