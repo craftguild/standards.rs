@@ -1,0 +1,84 @@
+name: Published installer acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Published stable version without the v prefix
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: warp-ubuntu-2404-x64-4x
+            os: Linux
+            arch: x86_64
+            target: x86_64-unknown-linux-gnu
+          - runner: warp-macos-26-arm64-6x
+            os: Darwin
+            arch: arm64
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: v${{ inputs.version }}
+      - name: Install both published commands, initialize a consumer and uninstall
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          ASSET_TARGET: ${{ matrix.target }}
+          EXPECTED_OS: ${{ matrix.os }}
+          EXPECTED_ARCH: ${{ matrix.arch }}
+        run: |
+          [[ "$RELEASE_VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          test "$(uname -s)" = "$EXPECTED_OS"
+          test "$(uname -m)" = "$EXPECTED_ARCH"
+          install_dir=$(mktemp -d "$RUNNER_TEMP/standards-install.XXXXXX")
+          trap 'rm -rf -- "$install_dir"' EXIT
+          evidence_dir="$GITHUB_WORKSPACE/target/installer-acceptance"
+          mkdir -p "$evidence_dir" "$install_dir/assets" "$install_dir/consumer"
+          git rev-parse HEAD > "$evidence_dir/tag-source.txt"
+          tag="v$RELEASE_VERSION"
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json tagName,targetCommitish,assets > "$evidence_dir/release.json"
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir "$install_dir/assets" \
+            --pattern "craftguild-standards-$tag-$ASSET_TARGET*" \
+            --pattern "craftguild-standards-engine-$tag-$ASSET_TARGET*"
+          for role in initializer engine; do
+            script=scripts/install.sh
+            command=craftguild-standards
+            if [ "$role" = engine ]; then
+              script=scripts/install-engine.sh
+              command=craftguild-standards-engine
+            fi
+            gh api -H 'Accept: application/vnd.github.raw+json' "repos/$GITHUB_REPOSITORY/contents/$script?ref=$tag" > "$install_dir/$role.sh"
+            cmp "$script" "$install_dir/$role.sh"
+            sh "$install_dir/$role.sh" --version "$RELEASE_VERSION" --bindir "$install_dir/bin"
+            cmp "$install_dir/assets/$command-$tag-$ASSET_TARGET" "$install_dir/bin/$command"
+            "$install_dir/bin/$command" --help > "$evidence_dir/$role-help.txt"
+            "$install_dir/bin/$command" --version > "$evidence_dir/$role-version.txt"
+            "$install_dir/bin/$command" sbom > "$evidence_dir/$role.bom.json"
+            cmp "$install_dir/assets/$command-$tag-$ASSET_TARGET.bom.json" "$evidence_dir/$role.bom.json"
+          done
+          (cd "$install_dir/consumer" && "$install_dir/bin/craftguild-standards" init && make prime) > "$evidence_dir/init-prime.txt"
+          cp "$install_dir/consumer/standards/engine.json" "$evidence_dir/engine.json"
+          for role in initializer engine; do
+            sh "$install_dir/$role.sh" --uninstall --bindir "$install_dir/bin"
+          done
+          test ! -e "$install_dir/bin/craftguild-standards"
+          test ! -e "$install_dir/bin/craftguild-standards-engine"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: installer-${{ matrix.target }}
+          path: target/installer-acceptance/*
+          if-no-files-found: error
+          retention-days: 30
