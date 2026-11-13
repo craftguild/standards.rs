@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 use std::{collections::BTreeSet, path::Path};
 use toml_edit::{value, DocumentMut};
 
+#[path = "cargo_lock.rs"]
+mod cargo_lock;
+
 /// Select the effective increment once, separately from breaking-change notes.
 pub fn select(
     current: &str,
@@ -55,6 +58,8 @@ pub struct Group {
 pub struct Cargo {
     pub manifest: String,
     pub lockfile: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub additional_lockfiles: Vec<String>,
     #[serde(default)]
     pub workspace: bool,
     pub packages: Vec<String>,
@@ -115,7 +120,11 @@ pub fn validate(groups: &[Group]) -> Result<()> {
         for p in g
             .cargo
             .iter()
-            .flat_map(|c| [&c.manifest, &c.lockfile])
+            .flat_map(|c| {
+                [&c.manifest, &c.lockfile]
+                    .into_iter()
+                    .chain(&c.additional_lockfiles)
+            })
             .chain(g.npm.iter().flat_map(|n| [&n.manifest, &n.lockfile]))
         {
             paths::relative(p)?;
@@ -233,28 +242,18 @@ pub fn changes(root: &Path, g: &Group, current: &str, next: &str) -> Result<Vec<
             doc["package"]["version"] = value(next);
         }
         edits.push(Change::existing(root, &c.manifest, doc.to_string())?);
-        let mut lock = read(root, &c.lockfile)?.parse::<DocumentMut>()?;
-        let mut seen = BTreeSet::new();
-        for entry in lock["package"]
-            .as_array_of_tables_mut()
-            .ok_or("Cargo lock packages missing")?
-            .iter_mut()
+        for (path, complete) in std::iter::once((&c.lockfile, true))
+            .chain(c.additional_lockfiles.iter().map(|p| (p, false)))
         {
-            let name = entry["name"]
-                .as_str()
-                .ok_or("Lock package name missing")?
-                .to_owned();
-            if c.packages.contains(&name) && !entry.contains_key("source") {
-                if entry["version"].as_str() != Some(current) || !seen.insert(name) {
-                    return Err("Cargo lock version/ownership mismatch".into());
-                }
-                entry["version"] = value(next);
-            }
+            edits.push(cargo_lock::change(
+                root,
+                path,
+                &c.packages,
+                current,
+                next,
+                complete,
+            )?);
         }
-        if seen != c.packages.iter().cloned().collect() {
-            return Err("Cargo lock lacks owned packages".into());
-        }
-        edits.push(Change::existing(root, &c.lockfile, lock.to_string())?);
     }
     for n in &g.npm {
         let mut doc: serde_json::Value = serde_json::from_str(&read(root, &n.manifest)?)?;

@@ -11,6 +11,12 @@ owner or tag prefix. All owned versions agree, with the first Cargo/npm manifest
 as authority. Independent artifacts use distinct groups. See
 [release design](releases.md) and [operation](../guides/releases.md).
 
+Cargo may also declare `additional_lockfiles = ["tests/consumer/Cargo.lock"]` for independent path consumers of the same owned packages.
+Each additional lockfile must contain at least one owned, source-free package at the current release version; it may contain a subset of the workspace packages.
+These literal repository paths have exclusive release ownership, just like the primary lockfile.
+Preparation updates those local package versions and version-qualified local dependency references while retaining registry/Git package versions.
+npm preparation preserves JSON member order, including nested conditional `exports` and `imports`, and changes only the manifest and lock root versions.
+
 The versioned repository configuration is `craftguild.toml`. Published v0.1.0 uses
 schema 1; the current engine also supports the schema 2 execution extension.
 Unknown fields, unknown adapters/policies, unsafe paths, overlapping source roles,

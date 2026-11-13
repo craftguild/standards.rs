@@ -28,7 +28,7 @@ craftguild-cli.workspace = true
 craftguild-core.workspace = true
 craftguild-cli-build.workspace = true
 serde.workspace = true
-serde_json.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
 toml.workspace = true
 figlet-rs.workspace = true
 syn.workspace = true

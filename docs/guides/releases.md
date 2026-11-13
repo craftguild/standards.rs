@@ -37,6 +37,10 @@ the first listed manifest owns the version. See the
 The independent sample defaults to its backend group; its frontend release is
 selected explicitly with `make release RELEASE_GROUP=frontend`.
 
+If an independent test or example workspace consumes local packages through path dependencies, list its lockfile in the owning Cargo declaration's `additional_lockfiles` array.
+For example, `additional_lockfiles = ["tests/consumer/Cargo.lock"]` keeps that consumer's selected local package versions synchronized without changing its own version or external dependency versions.
+Review these paths in the normal preview and receipt; do not repair prepared lockfiles by hand.
+
 Generated notes and a deterministic JSON receipt go into the group's public notes
 directory. Repeating preparation verifies those exact files and reports the same
 pending release. It also works after committing only the prepared edits. New source
