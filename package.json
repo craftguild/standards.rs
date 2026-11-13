@@ -11,5 +11,5 @@
     "test": "node --test adapters/tests/*.test.cjs",
     "typecheck": "tsc --allowJs --checkJs --noEmit --module commonjs --target es2022 --types node adapters/npm-tests.cjs"
   },
-  "version": "0.6.2"
+  "version": "0.6.1"
 }

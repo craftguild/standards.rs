@@ -21,16 +21,16 @@ Install the initializer with POSIX sh, curl, and sha256sum or shasum available.
 Initialization also needs Python 3. From the root of the repository to initialize:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/craftguild/standards.rs/v0.6.1/scripts/install.sh | sh -s -- --version 0.6.1
+curl -fsSL https://raw.githubusercontent.com/craftguild/standards.rs/main/scripts/install.sh | sh
 "$HOME/.local/bin/craftguild-standards" init
 make prime
 ```
 
-The installer defaults to `~/.local/bin`. Init acquires the same published
-version/revision of the engine and creates the reference, common entry and local
-Skill. Configure real artifacts before building. If a Makefile already exists,
-wire `include standards/make/common.mk`; until then use
-`python3 standards/launcher.py prime`. See the [execution guide](docs/guides/orchestration.md).
+The installer selects the latest published release and defaults to `~/.local/bin`.
+Init acquires that same published engine version and revision and creates the reference, common entry and local Skill.
+Configure real artifacts before building.
+If a Makefile already exists, wire `include standards/make/common.mk`; until then use `python3 standards/launcher.py prime`.
+See the [execution guide](docs/guides/orchestration.md).
 
 After cloning an already initialized repository, run `make setup`, then
 `make prime`. The committed entry acquires its fixed engine; no global CLI is
